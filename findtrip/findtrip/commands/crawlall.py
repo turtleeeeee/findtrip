@@ -1,5 +1,6 @@
-from scrapy.command import ScrapyCommand  
+from scrapy.commands import ScrapyCommand  
 from scrapy.crawler import CrawlerRunner
+from scrapy.exceptions import UsageError
 from scrapy.utils.conf import arglist_to_dict
 
 class Command(ScrapyCommand):
@@ -29,11 +30,10 @@ class Command(ScrapyCommand):
             raise UsageError("Invalid -a value, use -a NAME=VALUE", print_help=False)
 
     def run(self, args, opts):
-	#settings = get_project_settings()
-	
-	spider_loader = self.crawler_process.spider_loader
-	for spidername in args or spider_loader.list():
-	    print "*********cralall spidername************" + spidername
-	    self.crawler_process.crawl(spidername, **opts.spargs)
+	    #settings = get_project_settings()
+        spider_loader = self.crawler_process.spider_loader
+        for spidername in args or spider_loader.list():
+            print("*********cralall spidername************" + spidername)
+            self.crawler_process.crawl(spidername, **opts.spargs)
 
-        self.crawler_process.start()
+            self.crawler_process.start()

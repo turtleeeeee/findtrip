@@ -1,6 +1,5 @@
 # -*-coding:utf-8-*-  
   
-from scrapy import log  
   
 """避免被ban策略之一：使用useragent池。 
  
@@ -9,7 +8,7 @@ from scrapy import log
   
 import random  
 from scrapy import signals
-from scrapy.contrib.downloadermiddleware.useragent import UserAgentMiddleware  
+from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 
 class RandomUserAgentMiddleware(UserAgentMiddleware):
 

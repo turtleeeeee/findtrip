@@ -11,7 +11,7 @@ class CtripSpider(scrapy.Spider):
         sel = scrapy.Selector(response)
         fligint_div = "//div[@id='J_flightlist2']/div"
         dataList = sel.xpath(fligint_div)
-        print dataList,len(dataList)
+        print(dataList,len(dataList))
 
         items = []
         for index,each in enumerate(dataList):
@@ -20,7 +20,7 @@ class CtripSpider(scrapy.Spider):
             istrain = sel.xpath(flight_each + "//div[@class='train_flight_tit']")
 
             if istrain:
-                print "this data is train add"
+                print("this data is train add")
             else:
                 company = sel.xpath(flight_tr + "//div[@class='info-flight J_flight_no']//text()").extract()
 

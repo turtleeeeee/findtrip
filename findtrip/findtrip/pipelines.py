@@ -6,7 +6,7 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from findtrip.spiders.washctrip import wash
 import pymongo
-from scrapy.conf import settings
+from scrapy import settings
 from scrapy import log
 
 
