@@ -14,6 +14,8 @@ BOT_NAME = 'findtrip'
 SPIDER_MODULES = ['findtrip.spiders']
 NEWSPIDER_MODULE = 'findtrip.spiders'
 COMMANDS_MODULE = 'findtrip.commands'
+LOG_LEVEL = 'DEBUG'  # 可以设置为 DEBUG, INFO, WARNING, ERROR, CRITICAL
+
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
@@ -26,15 +28,15 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'findtrip.pipelines.MongoDBPipeline': 300,
+    'findtrip.pipelines.SqlAlchemyPipeline': 300,
 }
 
-MONGODB_HOST = 'localhost' # Change in prod
-MONGODB_PORT = 27017 # Change in prod
-MONGODB_DATABASE = "findtrip" # Change in prod
-MONGODB_COLLECTION = "qua"
-MONGODB_USERNAME = "" # Change in prod
-MONGODB_PASSWORD = "" # Change in prod
+# MONGODB_HOST = 'localhost' # Change in prod
+# MONGODB_PORT = 27017 # Change in prod
+# MONGODB_DATABASE = "findtrip" # Change in prod
+# MONGODB_COLLECTION = "qua"
+# MONGODB_USERNAME = "" # Change in prod
+# MONGODB_PASSWORD = "" # Change in prod
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'findtrip (+http://www.yourdomain.com)'

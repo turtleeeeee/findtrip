@@ -1,52 +1,57 @@
 import scrapy
 from findtrip.items import FindtripItem
+import json
+from datetime import datetime, timedelta
 
 class CtripSpider(scrapy.Spider):
     name = 'Ctrip'
     start_urls = [
-            "http://flights.ctrip.com/booking/XMN-BJS-day-1.html?DDate1=2016-04-19"
+            f"http://flights.ctrip.com/booking/XMN-BJS-day-1.html?DDate1={(datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d')}"
             ]
 
     def parse(self, response):
         sel = scrapy.Selector(response)
-        fligint_div = "//div[@id='J_flightlist2']/div"
-        dataList = sel.xpath(fligint_div)
-        print(dataList,len(dataList))
-
+        # 定位到包含所有航班信息的最外层div
+        flights = sel.xpath("//div[@class='seo-flight-list']/div[@class='list-content']/div[@class='list-content-item-transit']")
+        
         items = []
-        for index,each in enumerate(dataList):
-            flight_each = fligint_div+'['+str(index+1)+']'
-            flight_tr = flight_each+"//tr[@class='J_header_row']"
-            istrain = sel.xpath(flight_each + "//div[@class='train_flight_tit']")
+        for flight in flights:
+            item = FindtripItem()
 
-            if istrain:
-                print("this data is train add")
-            else:
-                company = sel.xpath(flight_tr + "//div[@class='info-flight J_flight_no']//text()").extract()
+            # 提取航空公司名称和飞机型号
+            airline_names = flight.xpath(".//div[@class='airline-name']/text()").extract()
+            plane_infos = flight.xpath(".//span[@class='plane-No']/text()").extract()
+            
+            plane_full_name = []
+            for i in range(len(airline_names)):
+                airline_names[i] = airline_names[i].strip()
+                plane_infos[i] = plane_infos[i].strip()
+                plane_full_name.append(airline_names[i] + ' ' + plane_infos[i])
 
-                flight_time_from = sel.xpath(flight_tr + "//td[@class='right']/div[1]//text()").extract()
-                flight_time_to = sel.xpath(flight_tr + "//td[@class='left']/div[1]//text()").extract()
-                flight_time = [flight_time_from,flight_time_to]
 
-                airports_from =  sel.xpath(flight_tr + "//td[@class='right']/div[2]//text()").extract()
-                airports_to = sel.xpath(flight_tr + "//td[@class='left']/div[2]//text()").extract()
-                airports = [airports_from,airports_to]
+            # 提取起降时间和机场信息
+            depart_times = flight.xpath(".//div[@class='depart-box']/div[@class='time']/text()").extract()
+            depart_airports = flight.xpath(".//div[@class='airport']/span[1]/text()").extract()
 
-                price_middle = sel.xpath(flight_tr + "[1]//td[@class='price middle ']/span//text()").extract()
-                price = sel.xpath(flight_tr + "[1]//td[@class='price ']/span//text()").extract()
-                if price_middle:
-                    price = price_middle
-                elif price:
-                    price = price
-                else:
-                    price = ''
+            arrive_times = flight.xpath(".//div[@class='arrive-box']/div[@class='time']/div/text()").extract()
 
-                item = FindtripItem()
-                item['site'] = 'Ctrip'
-                item['company'] = company
-                item['flight_time'] = flight_time
-                item['airports'] = airports
-                item['price'] = price
-                items.append(item)
+            # 提取价格和舱位信息
+            prices = flight.xpath(".//div[@class='price-detail']/span[@class='price']/dfn/following-sibling::text()").extract()
+            cabin_classes = flight.xpath(".//div[@class='rate-detail']/div[@class='className']/text()").extract()
 
+            transfer_duration = flight.xpath(".//span[@class='transfer-duration']/text()").extract()
+
+            # 填充item
+            item['site'] = 'Ctrip'
+            item['plane_info'] = ", ".join(plane_full_name)
+            item['departure_time'] = depart_times[0] if len(depart_times) > 0 else ''
+            item['departure_airport'] = depart_airports[0]
+            item['arrive_time'] = arrive_times[0] if len(arrive_times) > 0 else ''
+            item['arrive_airport'] = depart_airports[1]
+            item['price'] = prices[0] if len(prices) > 0 else ''
+            item['cabin_class'] = cabin_classes[0] if len(cabin_classes) > 0 else ''
+            item['transfer_duration'] = transfer_duration[0] if len(transfer_duration) > 0 else ''
+
+            items.append(item)
+        
         return items
