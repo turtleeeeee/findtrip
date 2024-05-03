@@ -1,12 +1,21 @@
 import scrapy
+import scrapy.commands
 from findtrip.items import FindtripItem
 import json
 from datetime import datetime, timedelta
 
 class CtripSpider(scrapy.Spider):
     name = 'Ctrip'
+    
+    now = datetime.now()
+    today = now.strftime('%Y-%m-%d')
+
+    six_days_later = now + timedelta(days=6)
+    six_days_later_str = six_days_later.strftime('%Y-%m-%d')
+
+    url = f"https://flights.ctrip.com/online/list/round-hkg-tyo?depdate={today}_{six_days_later_str}&cabin=y_s_c_f&adult=2&child=1&infant=0"
     start_urls = [
-            f"http://flights.ctrip.com/booking/XMN-BJS-day-1.html?DDate1={(datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d')}"
+            url
             ]
 
     def parse(self, response):
@@ -51,6 +60,20 @@ class CtripSpider(scrapy.Spider):
             item['price'] = prices[0] if len(prices) > 0 else ''
             item['cabin_class'] = cabin_classes[0] if len(cabin_classes) > 0 else ''
             item['transfer_duration'] = transfer_duration[0] if len(transfer_duration) > 0 else ''
+
+            # Convert departure_time to datetime object
+            departure_time_str = item['departure_time']
+            departure_time = datetime.strptime(departure_time_str, '%H:%M')
+
+            # Set departure_time to now
+            now = now.replace(hour=departure_time.hour, minute=departure_time.minute, second=0, microsecond=0)
+            item['departure_date_time'] = now
+            
+            # Set arrive_date_time to now
+            arrive_time_str = item['arrive_time']
+            arrive_time = datetime.strptime(arrive_time_str, '%H:%M')
+            six_day_later = now.replace(hour=arrive_time.hour, minute=arrive_time.minute, second=0, microsecond=0)
+            item['arrive_date_time'] = six_day_later
 
             items.append(item)
         

@@ -8,6 +8,7 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+import os
 
 BOT_NAME = 'findtrip'
 
@@ -31,12 +32,24 @@ ITEM_PIPELINES = {
     'findtrip.pipelines.SqlAlchemyPipeline': 300,
 }
 
-# MONGODB_HOST = 'localhost' # Change in prod
-# MONGODB_PORT = 27017 # Change in prod
-# MONGODB_DATABASE = "findtrip" # Change in prod
-# MONGODB_COLLECTION = "qua"
-# MONGODB_USERNAME = "" # Change in prod
-# MONGODB_PASSWORD = "" # Change in prod
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_USER = os.environ.get('DB_USER')
+DB_PASS = os.environ.get('DB_PASS')
+DB_NAME = os.environ.get('DB_NAME')
+DB_PORT = os.environ.get('DB_PORT', '3306')
+USE_SQLITE = os.environ.get('USE_SQLITE', '0') == '1'
+
+def db_url():
+    """
+    Returns the database URL.
+
+    Returns:
+        str: The database URL.
+    """
+    if USE_SQLITE:
+        return 'sqlite:///flights.db'
+    else:
+        return f'mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'findtrip (+http://www.yourdomain.com)'
